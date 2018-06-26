@@ -1,9 +1,10 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, send_from_directory
 import datetime
 import time
 from threading import Thread
 import RPi.GPIO as gpio
 import pickle
+import os
 
 gpio.setwarnings(False)
 
@@ -25,10 +26,16 @@ zona2 = 0
 zona3 = 0
 close = False
 
+alarmes = []
+
 
 @app.route("/")
 def main():
 	return render_template('main.html')
+
+@app.route('/js/<path:path>')
+def send_js(path):
+    return send_from_directory('js', path)
 
 @app.route("/mudaStatus")
 def muda_status():
@@ -47,6 +54,10 @@ def valida_status():
 	else:
 		return "off"
 
+@app.route("/atualizaAlarmes")
+def atualiza_alarmes():
+	return jsonify(alarmes)
+
 @app.route("/validaSensores")
 def valida_sensores():
 	return jsonify({"status" : [zona1, zona2, zona3]})
@@ -61,8 +72,9 @@ def save_to_file(file, dict):
 		pickle.dump(dict, f, pickle.HIGHEST_PROTOCOL)
 
 def load_from_file(file):
-	with open('obj/' + file, 'wb') as f:
-		return pickle.load(f)
+	if (os.path.isfile('obj/' + file)):
+		with open('obj/' + file, 'rb') as f:
+			return pickle.load(f)
 
 def ativa_sirene():
 	gpio.output(26,gpio.LOW)
@@ -76,12 +88,22 @@ def le_sensores():
 	global zona1
 	global zona2
 	global zona3
+	global alarmes
 
 	while not close:
 		if status_sistema:
 			zona1 = gpio.input(21)
 			zona2 = gpio.input(22)
 			zona3 = gpio.input(23)
+
+			if zona1 == 1:
+				alarmes.append({'zona': 'zona1', 'hora': datetime.datetime.now()})
+			if zona2 == 1:
+				alarmes.append({'zona': 'zona2', 'hora': datetime.datetime.now()})
+			if zona3 == 1:
+				alarmes.append({'zona': 'zona3', 'hora': datetime.datetime.now()})
+			
+			save_to_file('alarmes', alarmes)
 		else:
 			zona1 = 0
 			zona2 = 0
@@ -108,6 +130,9 @@ def le_status():
 
 try:
 	if __name__ == "__main__":
+
+		alarmes = load_from_file('alarmes') or []
+
 		t1 = Thread(target=ativa_sirene)
 		t2 = Thread(target=le_sensores)
 		t3 = Thread(target=le_status)

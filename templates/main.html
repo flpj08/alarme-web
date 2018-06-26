@@ -1,6 +1,8 @@
 <html>
+
 <head>
 	<title>{{title}}</title>
+	<script src="js/moment.js"></script>
 
 	<script>
 
@@ -8,7 +10,7 @@
 		let dois = null
 		let tres = null
 
-		function mudaStatus(){
+		function mudaStatus() {
 			let btn = document.querySelector('#btnStatus')
 			let headerStatus = document.querySelector('#headerStatus')
 			fetch('/mudaStatus').then((response) => {
@@ -18,16 +20,16 @@
 			})
 		}
 
-		function validaStatus(){
+		function validaStatus() {
 			let btn = document.querySelector('#btnStatus')
 			let headerStatus = document.querySelector('#headerStatus')
 			fetch('/validaStatus').then((response) => {
 				return response.text().then((data) => {
-					if (data === 'off'){
+					if (data === 'off') {
 						headerStatus.innerHTML = "DESATIVADO"
 						headerStatus.classList = 'desativado'
 						btn.innerHTML = "Ativar"
-					}else{
+					} else {
 						headerStatus.innerHTML = "ATIVADO"
 						headerStatus.classList = 'ativado'
 						btn.innerHTML = "Desativar"
@@ -36,31 +38,59 @@
 			})
 		}
 
-		function validaSensores(){
+		function atualizaTabelaAlarmes() {
+			let alarmes = document.querySelector('#alarmes')
+			fetch('/atualizaAlarmes').then((response) => {
+				return response.json().then((data) => {
+					if (data.length > 0) {
+						html = ''
+
+						data.forEach(e => {
+							console.log(e)
+							html += `
+							<tr>
+							<td>
+								${e['zona']}
+							</td>
+							<td>
+								${moment(e['hora']).format('DD/MM/YYYY HH:mm')}
+							</td>
+							</tr>
+							`
+						})
+
+						console.log(html)
+						alarmes.innerHTML = html
+					}
+				})
+			})
+		}
+
+		function validaSensores() {
 			fetch('/validaSensores').then((response) => {
 				return response.json().then((data) => {
-					for (i in data){
+					for (i in data) {
 						let dados = data[i]
-						for (i=0; i<dados.length;i++){
-							if (i === 0){
-								if (dados[i] === 0){
+						for (i = 0; i < dados.length; i++) {
+							if (i === 0) {
+								if (dados[i] === 0) {
 									um.classList = 'vermelho'
-								}else{
+								} else {
 									um.classList = 'verde'
 								}
 							}
-							if (i === 1){
-								if (dados[i] === 0){
+							if (i === 1) {
+								if (dados[i] === 0) {
 									dois.classList = 'vermelho'
-								}else{
+								} else {
 									dois.classList = 'verde'
 								}
 							}
 
-							if (i === 2){
-								if (dados[i] === 0){
+							if (i === 2) {
+								if (dados[i] === 0) {
 									tres.classList = 'vermelho'
-								}else{
+								} else {
 									tres.classList = 'verde'
 								}
 							}
@@ -71,53 +101,64 @@
 		}
 
 		document.onreadystatechange = (c) => {
-			if (c.type === 'readystatechange'){
+			if (c.type === 'readystatechange') {
 				um = document.querySelector('#um')
 				dois = document.querySelector('#dois')
-				tres = document.querySelector('#tres')		
+				tres = document.querySelector('#tres')
+
+				atualizaTabelaAlarmes()
+				validaStatus()
+				validaSensores()
+
 				setInterval(() => {
 					validaStatus()
 					validaSensores()
 				}, 1000)
+
+				setInterval(() => {
+					atualizaTabelaAlarmes()
+				}, 5000)
 			}
 		}
-	
+
 	</script>
 
 	<style>
-
-		.ativado{
+		.ativado {
 			color: green;
 		}
 
-		.desativado{
+		.desativado {
 			color: red;
 		}
 
-		.vermelho{
+		.vermelho {
 			height: 100px;
 			width: 100px;
 			background-color: red;
-			display: inline-block; 
 			border-radius: 50%;
 			color: white;
 			text-align: center;
 			line-height: 100px;
 		}
 
-		.verde{
+		.verde {
 			height: 100px;
 			width: 100px;
 			background-color: green;
-			display: inline-block; 
 			border-radius: 50%;
 			color: white;
 			text-align: center;
 			line-height: 100px;
 		}
 
+		table {
+			width: 100%;
+			text-align: center;
+		}
 	</style>
 </head>
+
 <body>
 
 	<h1 id="headerStatus" class="desativado">Desativado</h1>
@@ -125,16 +166,42 @@
 	<button id="btnStatus" onclick="mudaStatus()">Ativa</button>
 
 	<div style="height: 100px; margin: 50px">
-		<div id="um" class="vermelho">
-			ZONA 1
-		</div>	
-		<div id="dois" class="vermelho">
-			ZONA 2
+		<div style="display: inline">
+			<div id="um" class="vermelho">
+				ZONA 1
+			</div>
+			<button>Desativar Zona</button>
 		</div>
-		<div id="tres" class="vermelho">
-			ZONA 3
+		<div style="display: inline">
+			<div id="dois" class="vermelho">
+				ZONA 2
+			</div>
+			<button>Desativar Zona</button>
+		</div>
+		<div style="display: inline">
+			<div id="tres" class="vermelho">
+				ZONA 3
+			</div>
+			<button>Desativar Zona</button>
 		</div>
 	</div>
 
+	<table>
+		<thead>
+			<tr>
+				<th>
+					Zona
+				</th>
+				<th>
+					Horário
+				</th>
+			</tr>
+		</thead>
+		<tbody id="alarmes">
+
+		</tbody>
+	</table>
+
 </body>
+
 </html>

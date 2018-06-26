@@ -28,6 +28,7 @@ def output(port, status):
 def input(port):
     arquivo = os.path.isfile(str(port))
     if arquivo:
+        os.remove(str(port))
         return 1
     else:
         return 0
