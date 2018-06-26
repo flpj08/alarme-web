@@ -24,6 +24,9 @@ status_sistema = False
 zona1 = 0
 zona2 = 0
 zona3 = 0
+monitora_zona1 = True
+monitora_zona2 = True
+monitora_zona3 = True
 close = False
 
 alarmes = []
@@ -92,15 +95,15 @@ def le_sensores():
 
 	while not close:
 		if status_sistema:
-			zona1 = gpio.input(21)
-			zona2 = gpio.input(22)
-			zona3 = gpio.input(23)
+			zona1 = monitora_zona1 and gpio.input(21)
+			zona2 = monitora_zona2 and gpio.input(22)
+			zona3 = monitora_zona3 and gpio.input(23)
 
-			if zona1 == 1:
+			if zona1 == 1 and monitora_zona1:
 				alarmes.append({'zona': 'zona1', 'hora': datetime.datetime.now()})
-			if zona2 == 1:
+			if zona2 == 1 and monitora_zona2:
 				alarmes.append({'zona': 'zona2', 'hora': datetime.datetime.now()})
-			if zona3 == 1:
+			if zona3 == 1 and monitora_zona3:
 				alarmes.append({'zona': 'zona3', 'hora': datetime.datetime.now()})
 			
 			save_to_file('alarmes', alarmes)
