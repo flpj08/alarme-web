@@ -1,0 +1,140 @@
+<html>
+<head>
+	<title>{{title}}</title>
+
+	<script>
+
+		let um = null
+		let dois = null
+		let tres = null
+
+		function mudaStatus(){
+			let btn = document.querySelector('#btnStatus')
+			let headerStatus = document.querySelector('#headerStatus')
+			fetch('/mudaStatus').then((response) => {
+				return response.text().then((data) => {
+					validaStatus()
+				})
+			})
+		}
+
+		function validaStatus(){
+			let btn = document.querySelector('#btnStatus')
+			let headerStatus = document.querySelector('#headerStatus')
+			fetch('/validaStatus').then((response) => {
+				return response.text().then((data) => {
+					if (data === 'off'){
+						headerStatus.innerHTML = "DESATIVADO"
+						headerStatus.classList = 'desativado'
+						btn.innerHTML = "Ativar"
+					}else{
+						headerStatus.innerHTML = "ATIVADO"
+						headerStatus.classList = 'ativado'
+						btn.innerHTML = "Desativar"
+					}
+				})
+			})
+		}
+
+		function validaSensores(){
+			fetch('/validaSensores').then((response) => {
+				return response.json().then((data) => {
+					for (i in data){
+						let dados = data[i]
+						for (i=0; i<dados.length;i++){
+							if (i === 0){
+								if (dados[i] === 0){
+									um.classList = 'vermelho'
+								}else{
+									um.classList = 'verde'
+								}
+							}
+							if (i === 1){
+								if (dados[i] === 0){
+									dois.classList = 'vermelho'
+								}else{
+									dois.classList = 'verde'
+								}
+							}
+
+							if (i === 2){
+								if (dados[i] === 0){
+									tres.classList = 'vermelho'
+								}else{
+									tres.classList = 'verde'
+								}
+							}
+						}
+					}
+				})
+			})
+		}
+
+		document.onreadystatechange = (c) => {
+			if (c.type === 'readystatechange'){
+				um = document.querySelector('#um')
+				dois = document.querySelector('#dois')
+				tres = document.querySelector('#tres')		
+				setInterval(() => {
+					validaStatus()
+					validaSensores()
+				}, 1000)
+			}
+		}
+	
+	</script>
+
+	<style>
+
+		.ativado{
+			color: green;
+		}
+
+		.desativado{
+			color: red;
+		}
+
+		.vermelho{
+			height: 100px;
+			width: 100px;
+			background-color: red;
+			display: inline-block; 
+			border-radius: 50%;
+			color: white;
+			text-align: center;
+			line-height: 100px;
+		}
+
+		.verde{
+			height: 100px;
+			width: 100px;
+			background-color: green;
+			display: inline-block; 
+			border-radius: 50%;
+			color: white;
+			text-align: center;
+			line-height: 100px;
+		}
+
+	</style>
+</head>
+<body>
+
+	<h1 id="headerStatus" class="desativado">Desativado</h1>
+
+	<button id="btnStatus" onclick="mudaStatus()">Ativa</button>
+
+	<div style="height: 100px; margin: 50px">
+		<div id="um" class="vermelho">
+			ZONA 1
+		</div>	
+		<div id="dois" class="vermelho">
+			ZONA 2
+		</div>
+		<div id="tres" class="vermelho">
+			ZONA 3
+		</div>
+	</div>
+
+</body>
+</html>
