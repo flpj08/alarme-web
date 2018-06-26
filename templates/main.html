@@ -26,11 +26,11 @@
 			fetch('/validaStatus').then((response) => {
 				return response.text().then((data) => {
 					if (data === 'off') {
-						headerStatus.innerHTML = "DESATIVADO"
+						headerStatus.innerHTML = "O sistema está DESATIVADO"
 						headerStatus.classList = 'desativado'
 						btn.innerHTML = "Ativar"
 					} else {
-						headerStatus.innerHTML = "ATIVADO"
+						headerStatus.innerHTML = "O sistema está ATIVADO"
 						headerStatus.classList = 'ativado'
 						btn.innerHTML = "Desativar"
 					}
@@ -126,10 +126,12 @@
 	<style>
 		.ativado {
 			color: green;
+			text-align: center;
 		}
 
 		.desativado {
 			color: red;
+			text-align: center;
 		}
 
 		.vermelho {
@@ -155,7 +157,7 @@
 		}
 
 		.container {
-			width: 25%;
+			width: 33%;
 			display: inline-block;
 			text-align: center;
 		}
@@ -164,14 +166,19 @@
 			width: 100%;
 			text-align: center;
 		}
+
+		th{
+			width: 50%;
+		}
 	</style>
 </head>
 
 <body>
 
-	<h1 id="headerStatus" class="desativado">Desativado</h1>
-
-	<button id="btnStatus" onclick="mudaStatus()">Ativa</button>
+	<h1 id="headerStatus" class="desativado">O sistema está DESATIVADO</h1>
+	<div style="text-align: center; margin: auto">
+		<button id="btnStatus" onclick="mudaStatus()">Ativa</button>
+	</div>
 
 	<div style="height: 100px; margin: 50px">
 		<div class="container">
